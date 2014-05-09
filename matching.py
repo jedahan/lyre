@@ -2,6 +2,9 @@ import click
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+from pymongo import MongoClient
+client = MongoClient()
+db = client.images
 
 @click.command()
 @click.argument('image')
@@ -9,18 +12,24 @@ def describe(image):
   """print out the keypoints and description for this image"""
   needle = cv2.imread(image, 0)
   orb = cv2.ORB()
-  keypoint, description = orb.detectAndCompute(needle, None)
-  print(keypoint)
+  keypoints, description = orb.detectAndCompute(needle, None)
+  print(keypoints)
   print(description)
-  return keypoint, description
+  return keypoints, description
 
 @click.command()
 @click.argument('image')
 def save(image):
   """save the image into the database"""
-  keypoint, description = describe(image)
-  # save to mongodb
-  return
+  keypoints, description = describe(image)
+  artwork = {
+    "keypoints": keypoints,
+    "description": description,
+    "path": image,
+    "date": datetime.datetime.utcnow()
+  }
+  artwork_id = db.insert(artwork)
+  print(artwork_id)
 
 @click.command()
 @click.argument('image')
