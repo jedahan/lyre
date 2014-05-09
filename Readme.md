@@ -1,6 +1,6 @@
 Try to match images
 
-# Requirements
+### Requirements
 
     brew install opencv --with-qt --HEAD
     brew tap homebrew/science
@@ -9,7 +9,7 @@ Try to match images
     easy_install matplotlib
     easy_install six # dependency for matplotlib
 
-# Running
+### Running
 
     mongod --dbpath db/
     python matching.py --help
