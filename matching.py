@@ -2,25 +2,25 @@ import click
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-from pymongo import MongoClient
-client = MongoClient()
-db = client.images
+
 
 @click.command()
-@click.argument('image')
-def describe(image):
-  """print out the keypoints and description for this image"""
-  needle = cv2.imread(image, 0)
-  orb = cv2.ORB()
-  keypoints, description = orb.detectAndCompute(needle, None)
-  print(keypoints)
-  print(description)
-  return keypoints, description
+@click.argument('images', nargs=-1)
+def describe(images):
+  """print out the keypoints and description for IMAGE"""
+  for image in images:
+    needle = cv2.imread(image, 0)
+    orb = cv2.ORB()
+    keypoints, description = orb.detectAndCompute(needle, None)
+    print(keypoints)
+    print(description)
+    return keypoints, description
 
-@click.command()
-@click.argument('image')
-def save(image):
-  """save the image into the database"""
+@cli.command()
+@click.argument('images')
+def save(images):
+  """save IMAGE keypoints and description to the database"""
+  connect_to_db()
   keypoints, description = describe(image)
   artwork = {
     "keypoints": keypoints,
@@ -31,11 +31,12 @@ def save(image):
   artwork_id = db.insert(artwork)
   print(artwork_id)
 
-@click.command()
+@cli.command()
 @click.argument('image')
 def find(image):
-  """use this image to search for similar images in the db"""
+  """use IMAGE to search for similar images that are in the db"""
   keypoint, description = describe(image)
+  connect_to_db()
   # load keypoints, descriptions from mongodb
 
   bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
@@ -69,6 +70,11 @@ def find(image):
 
   plt.imshow(match),plt.show()
   return
+
+def connect_to_db():
+  from pymongo import MongoClient
+  client = MongoClient()
+  db = client.images
 
 if __name__ == '__main__':
     describe()
