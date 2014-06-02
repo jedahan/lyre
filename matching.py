@@ -16,7 +16,7 @@ def describe(images):
     print(description)
     return keypoints, description
 
-@cli.command()
+@click.command()
 @click.argument('images')
 def save(images):
   """save IMAGE keypoints and description to the database"""
@@ -31,7 +31,7 @@ def save(images):
   artwork_id = db.insert(artwork)
   print(artwork_id)
 
-@cli.command()
+@click.command()
 @click.argument('image')
 def find(image):
   """use IMAGE to search for similar images that are in the db"""
@@ -60,6 +60,7 @@ def find(image):
 
     match_index += 1
 
+  # this last part ([:,:,::-1]), flips the rgb representation to bgr, since cv2 and drawmatches work differently
   needle_color = cv2.imread('needle-stripped.png')[:,:,::-1]   # needle
   best_match_image = cv2.imread("haystack/"+files[best_match_index])
   print "best match is ", files[best_match_index]
